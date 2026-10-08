@@ -17,6 +17,24 @@ const items = [
   ["/admin/definicoes", "Definições", Settings],
 ] as const;
 
+const CHECK_TIMEOUT_MS = 8000;
+
+function withTimeout<T>(promise: Promise<T>, message: string): Promise<T> {
+  return new Promise((resolve, reject) => {
+    const timer = window.setTimeout(() => reject(new Error(message)), CHECK_TIMEOUT_MS);
+    promise.then(
+      (value) => {
+        window.clearTimeout(timer);
+        resolve(value);
+      },
+      (error) => {
+        window.clearTimeout(timer);
+        reject(error);
+      },
+    );
+  });
+}
+
 export function AdminShell({ children }: { children: ReactNode }) {
   const navigate = useNavigate();
   const [ready, setReady] = useState(false);
@@ -24,30 +42,88 @@ export function AdminShell({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     let alive = true;
-    (async () => {
-      const supabase = requireSupabase();
-      const user = await supabase.auth.getUser();
-      const profile = await supabase.from("user_profiles").select("display_name,role,is_active").single();
-      const aal = await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
-      if (!user.data.user || profile.data?.role !== "admin" || !profile.data.is_active || aal.data?.currentLevel !== "aal2") {
-        await supabase.auth.signOut();
-        if (alive) navigate({ to: "/admin/login", replace: true });
-        return;
+
+    async function checkAdminSession() {
+      try {
+        const supabase = requireSupabase();
+
+        const userResult = await withTimeout(
+          supabase.auth.getUser(),
+          "A sessão demorou demasiado tempo a responder.",
+        );
+
+        const user = userResult.data.user;
+        if (!user) {
+          throw new Error("Sessão administrativa inexistente.");
+        }
+
+        const [profileResult, aalResult] = await withTimeout(
+          Promise.all([
+            supabase
+              .from("user_profiles")
+              .select("display_name,role,is_active")
+              .eq("id", user.id)
+              .maybeSingle(),
+            supabase.auth.mfa.getAuthenticatorAssuranceLevel(),
+          ]),
+          "A validação administrativa demorou demasiado tempo.",
+        );
+
+        if (profileResult.error) {
+          throw profileResult.error;
+        }
+
+        const profile = profileResult.data;
+        if (
+          !profile ||
+          profile.role !== "admin" ||
+          profile.is_active !== true ||
+          aalResult.error ||
+          aalResult.data.currentLevel !== "aal2"
+        ) {
+          await supabase.auth.signOut();
+          if (alive) {
+            await navigate({ to: "/admin/login", replace: true });
+          }
+          return;
+        }
+
+        if (alive) {
+          setName(profile.display_name || user.email || "Administrador");
+          setReady(true);
+        }
+      } catch (error) {
+        console.error("Admin session check failed:", error);
+        if (alive) {
+          await navigate({ to: "/admin/login", replace: true });
+        }
       }
-      if (alive) {
-        setName(profile.data.display_name || user.data.user.email || "Administrador");
-        setReady(true);
-      }
-    })().catch(() => navigate({ to: "/admin/login", replace: true }));
-    return () => { alive = false; };
+    }
+
+    void checkAdminSession();
+
+    return () => {
+      alive = false;
+    };
   }, [navigate]);
 
   async function logout() {
     await requireSupabase().auth.signOut();
-    navigate({ to: "/admin/login", replace: true });
+    await navigate({ to: "/admin/login", replace: true });
   }
 
-  if (!ready) return <div className="flex min-h-screen items-center justify-center bg-background"><p className="text-sm text-muted-foreground">A verificar sessão administrativa…</p></div>;
+  if (!ready) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-background px-6">
+        <div className="w-full max-w-md rounded-2xl border bg-background p-6 text-center shadow-sm">
+          <p className="text-sm font-semibold text-primary">A verificar sessão administrativa…</p>
+          <p className="mt-2 text-xs text-muted-foreground">
+            A validação de segurança pode demorar alguns segundos.
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-muted/30">
@@ -58,21 +134,43 @@ export function AdminShell({ children }: { children: ReactNode }) {
         </div>
         <nav className="flex-1 space-y-1 overflow-y-auto p-4">
           {items.map(([to, label, Icon]) => (
-            <Link key={to} to={to} activeOptions={{ exact: to === "/admin" }} className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-primary-foreground/75 hover:bg-primary-foreground/10 [&.active]:bg-yellow-400 [&.active]:text-black">
-              <Icon className="h-4 w-4" />{label}
+            <Link
+              key={to}
+              to={to}
+              activeOptions={{ exact: to === "/admin" }}
+              className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-primary-foreground/75 hover:bg-primary-foreground/10 [&.active]:bg-yellow-400 [&.active]:text-black"
+            >
+              <Icon className="h-4 w-4" />
+              {label}
             </Link>
           ))}
         </nav>
         <div className="border-t border-primary-foreground/10 p-4">
           <p className="truncate text-sm font-semibold">{name}</p>
           <p className="mb-3 text-xs text-primary-foreground/60">Administrador · MFA ativo</p>
-          <button onClick={logout} className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm hover:bg-primary-foreground/10"><LogOut className="h-4 w-4" />Sair</button>
+          <button
+            onClick={logout}
+            className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm hover:bg-primary-foreground/10"
+          >
+            <LogOut className="h-4 w-4" />
+            Sair
+          </button>
         </div>
       </aside>
+
       <div className="lg:pl-64">
         <header className="sticky top-0 z-30 border-b border-border bg-background/95 px-4 py-4 backdrop-blur md:px-8">
-          <div className="flex items-center justify-between"><div><p className="text-xs font-bold uppercase tracking-widest text-yellow-600">Área reservada</p><p className="text-sm text-muted-foreground">Gestão académica e administrativa</p></div><button onClick={logout} className="rounded-md border px-3 py-2 text-sm lg:hidden">Sair</button></div>
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-xs font-bold uppercase tracking-widest text-yellow-600">Área reservada</p>
+              <p className="text-sm text-muted-foreground">Gestão académica e administrativa</p>
+            </div>
+            <button onClick={logout} className="rounded-md border px-3 py-2 text-sm lg:hidden">
+              Sair
+            </button>
+          </div>
         </header>
+
         <main className="mx-auto max-w-7xl px-4 py-6 md:px-8 md:py-8">{children}</main>
       </div>
     </div>
