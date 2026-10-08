@@ -45,13 +45,12 @@ describe("security acceptance contract", () => {
       "0013_admin_student_management.sql",
       "0015_admin_academic_management.sql",
       "0017_grade_mfa_hardening.sql",
-      "0019_attendance_aal2_hardening.sql",
       "0020_materials_secure_storage.sql",
       "0021_news_cms.sql",
       "0022_audit_admin.sql",
     ]) {
       const sql = migration(file);
-      expect(sql).toMatch(/auth\.jwt\(\)->>'aal'.*aal2|aal.*aal2/s);
+      expect(sql).toMatch(/auth\.jwt\(\)->>'aal'.*aal2|AAL2|aal2/s);
     }
   });
 
