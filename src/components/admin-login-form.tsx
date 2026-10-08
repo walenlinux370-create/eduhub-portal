@@ -14,16 +14,69 @@ export function AdminLoginForm({role}:Props){
   const [error,setError]=useState("");
 
   async function submit(e:React.FormEvent<HTMLFormElement>){
-    e.preventDefault();setBusy(true);setError("");
+    e.preventDefault();
+    setBusy(true);
+    setError("");
+
     if(password.length<12){
       setError("Não foi possível autenticar. Verifique os dados ou contacte o administrador.");
-      setBusy(false);return;
+      setBusy(false);
+      return;
     }
-    const {error:authError}=await supabase.auth.signInWithPassword({email:email.trim().toLowerCase(),password});
+
+    const {error:authError}=await supabase.auth.signInWithPassword({
+      email:email.trim().toLowerCase(),
+      password
+    });
+
     if(authError){
       setError("Não foi possível autenticar. Verifique os dados ou contacte o administrador.");
-      setBusy(false);return;
+      setBusy(false);
+      return;
     }
+
+    const {data:factors,error:factorsError}=await supabase.auth.mfa.listFactors();
+    const verifiedTotp=factors?.totp?.find(factor=>factor.status==="verified");
+
+    if(factorsError || !verifiedTotp){
+      await supabase.auth.signOut();
+      setError("Não foi possível autenticar. A autenticação multifator TOTP é obrigatória.");
+      setBusy(false);
+      return;
+    }
+
+    const {data:challenge,error:challengeError}=await supabase.auth.mfa.challenge({
+      factorId:verifiedTotp.id
+    });
+
+    if(challengeError || !challenge?.id){
+      await supabase.auth.signOut();
+      setError("Não foi possível autenticar. Tente novamente.");
+      setBusy(false);
+      return;
+    }
+
+    const code=window.prompt("Introduza o código TOTP de 6 dígitos.");
+    if(!code || !/^\d{6}$/.test(code)){
+      await supabase.auth.signOut();
+      setError("Não foi possível autenticar. O código MFA é obrigatório.");
+      setBusy(false);
+      return;
+    }
+
+    const {error:verifyError}=await supabase.auth.mfa.verify({
+      factorId:verifiedTotp.id,
+      challengeId:challenge.id,
+      code
+    });
+
+    if(verifyError){
+      await supabase.auth.signOut();
+      setError("Não foi possível autenticar. Verifique o código MFA e tente novamente.");
+      setBusy(false);
+      return;
+    }
+
     window.location.assign(role==="admin"?"/admin":"/professor");
   }
 
