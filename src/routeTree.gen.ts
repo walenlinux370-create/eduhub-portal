@@ -2,7 +2,7 @@
 
 // @ts-nocheck
 
-// Generated route tree with the administrative routes removed.
+// Generated route tree including the protected AdminEdu routes.
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
@@ -57,6 +57,8 @@ export interface RootRouteChildren {
   NoticiasRoute: typeof NoticiasRoute
   PrivacidadeRoute: typeof PrivacidadeRoute
   SobreRoute: typeof SobreRoute
+  AdminRoute: typeof AdminRoute
+  AdminLoginRoute: typeof AdminLoginRoute
 }
 
 declare module '@tanstack/react-router' {
