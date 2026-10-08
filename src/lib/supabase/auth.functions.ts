@@ -11,6 +11,18 @@ type AdminLoginInput = {
   password: string;
 };
 
+export const checkAuthRuntime = createServerFn({ method: "GET" })
+  .handler(async () => {
+    const supabase = createServerSupabase();
+    const { error } = await supabase.auth.getSession();
+
+    if (error) {
+      throw new Error("Runtime SSR do Supabase indisponível: " + error.message);
+    }
+
+    return { ok: true };
+  });
+
 export const signInAdmin = createServerFn({ method: "POST" })
   .validator((data: AdminLoginInput) => {
     const email = data.email?.trim();
@@ -49,18 +61,12 @@ export const signInAdmin = createServerFn({ method: "POST" })
       throw new Error("Não foi possível validar o perfil administrativo: " + profileResult.error.message);
     }
 
-    if (
-      !profileResult.data ||
-      profileResult.data.role !== "admin" ||
-      profileResult.data.is_active !== true
-    ) {
+    if (!profileResult.data || profileResult.data.role !== "admin" || profileResult.data.is_active !== true) {
       await supabase.auth.signOut();
       throw new Error("A conta autenticada não tem permissões administrativas ativas.");
     }
 
-    const aalResult = await supabase.auth.mfa.getAuthenticatorAssuranceLevel(
-      session.access_token,
-    );
+    const aalResult = await supabase.auth.mfa.getAuthenticatorAssuranceLevel(session.access_token);
 
     if (aalResult.error) {
       await supabase.auth.signOut();
@@ -102,18 +108,11 @@ export const establishAdminSession = createServerFn({ method: "POST" })
 
     const userResult = await supabase.auth.getUser();
     if (userResult.error || !userResult.data.user?.id) {
-      throw new Error(
-        "A identidade administrativa não pôde ser confirmada: " +
-          (userResult.error?.message ?? "utilizador ausente"),
-      );
+      throw new Error("A identidade administrativa não pôde ser confirmada: " + (userResult.error?.message ?? "utilizador ausente"));
     }
 
     const [profileResult, aalResult] = await Promise.all([
-      supabase
-        .from("user_profiles")
-        .select("display_name,role,is_active")
-        .eq("id", session.user.id)
-        .maybeSingle(),
+      supabase.from("user_profiles").select("display_name,role,is_active").eq("id", session.user.id).maybeSingle(),
       supabase.auth.mfa.getAuthenticatorAssuranceLevel(session.access_token),
     ]);
 
@@ -121,11 +120,7 @@ export const establishAdminSession = createServerFn({ method: "POST" })
       throw new Error("Perfil administrativo: " + profileResult.error.message);
     }
 
-    if (
-      !profileResult.data ||
-      profileResult.data.role !== "admin" ||
-      profileResult.data.is_active !== true
-    ) {
+    if (!profileResult.data || profileResult.data.role !== "admin" || profileResult.data.is_active !== true) {
       await supabase.auth.signOut();
       throw new Error("A conta autenticada não tem permissões administrativas ativas.");
     }
