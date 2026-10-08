@@ -52,6 +52,12 @@ function AdminLogin() {
       if (challenge.error) throw challenge.error;
       const result = await supabase.auth.mfa.verify({ factorId, challengeId: challenge.data.id, code });
       if (result.error) throw result.error;
+
+      const sessionResult = await supabase.auth.getSession();
+      if (sessionResult.error || !sessionResult.data.session?.user?.id) {
+        throw sessionResult.error ?? new Error("A sessão não ficou disponível após a verificação MFA.");
+      }
+
       await navigate({ to: "/admin", replace: true });
     } catch {
       setError(step === "enroll" ? "Não foi possível ativar o MFA. Confirme o código." : "Código de autenticação inválido.");
