@@ -9,7 +9,13 @@ let browserClient: ReturnType<typeof createBrowserClient> | null = null;
 
 export function requireSupabase() {
   if (!browserClient) {
-    browserClient = createBrowserClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
+    browserClient = createBrowserClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
+      auth: {
+        persistSession: true,
+        autoRefreshToken: true,
+        detectSessionInUrl: true,
+      },
+    });
   }
   return browserClient;
 }
