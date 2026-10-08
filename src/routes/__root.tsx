@@ -9,6 +9,7 @@ import {
   type ErrorComponentProps,
 } from "@tanstack/react-router";
 import { useEffect, type ReactNode } from "react";
+import { useLocation } from "@tanstack/react-router";
 
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
@@ -114,6 +115,12 @@ function RootShell({ children }: { children: ReactNode }) {
 
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
+  const location = useLocation();
+  const isAdminArea = location.pathname.startsWith("/admin");
+
+  if (isAdminArea) {
+    return <QueryClientProvider client={queryClient}><Outlet /></QueryClientProvider>;
+  }
 
   return (
     <QueryClientProvider client={queryClient}>
