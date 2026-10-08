@@ -50,13 +50,25 @@ export function AdminShell({ children }: { children: ReactNode }) {
         const supabase = requireSupabase();
 
         if (alive) setCheckStage("A validar a sessão segura…");
-        const sessionResult = await withTimeout(
+        let sessionResult = await withTimeout(
           supabase.auth.getSession(),
           "A validação da sessão demorou demasiado tempo.",
         );
 
-        if (sessionResult.error || !sessionResult.data.session?.user?.id) {
-          throw sessionResult.error ?? new Error("Sessão administrativa inexistente.");
+        if (sessionResult.error) throw sessionResult.error;
+
+        if (!sessionResult.data.session?.user?.id) {
+          if (alive) setCheckStage("A renovar a sessão segura…");
+          const refreshResult = await withTimeout(
+            supabase.auth.refreshSession(),
+            "Não foi possível renovar a sessão administrativa.",
+          );
+          if (refreshResult.error) throw refreshResult.error;
+          sessionResult = refreshResult;
+        }
+
+        if (!sessionResult.data.session?.user?.id) {
+          throw new Error("Sessão administrativa inexistente.");
         }
 
         const user = sessionResult.data.session.user;
