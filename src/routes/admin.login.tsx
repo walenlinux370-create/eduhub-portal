@@ -2,7 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { FormEvent, useState } from "react";
 import { ShieldCheck } from "lucide-react";
 import { isSupabaseConfigured, requireSupabase } from "@/lib/supabase";
-import { establishAdminSession, signInAdmin } from "@/lib/supabase/auth.functions";
+import { checkAuthRuntime, establishAdminSession, signInAdmin } from "@/lib/supabase/auth.functions";
 
 export const Route = createFileRoute("/admin/login")({
   head: () => ({ meta: [{ title: "Acesso administrativo — Escola Jossyquina" }, { name: "robots", content: "noindex,nofollow" }] }),
@@ -26,6 +26,7 @@ function AdminLogin() {
     setError("");
 
     try {
+      await checkAuthRuntime();
       const signed = await signInAdmin({
         data: {
           email: email.trim(),
