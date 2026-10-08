@@ -5,6 +5,11 @@ const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_NkOcpj4VnhdmE3aU5PaI6Q_11V19uRX
 
 export const isSupabaseConfigured = true;
 
+let browserClient: ReturnType<typeof createBrowserClient> | null = null;
+
 export function requireSupabase() {
-  return createBrowserClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
+  if (!browserClient) {
+    browserClient = createBrowserClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
+  }
+  return browserClient;
 }
