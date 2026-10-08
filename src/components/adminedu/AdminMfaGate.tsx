@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { ShieldCheck } from "lucide-react";
 import { requireSupabase } from "@/lib/supabase";
 
@@ -88,7 +88,7 @@ export function AdminMfaGate({ onReady }: Props) {
   );
 }
 
-function GateShell({ text, children }: { text: string; children?: React.ReactNode }) {
+function GateShell({ text, children }: { text: string; children?: ReactNode }) {
   return (
     <main className="flex min-h-screen items-center justify-center bg-slate-50 px-5">
       <section className="w-full max-w-md rounded-xl border bg-white p-7 text-center shadow-sm">
