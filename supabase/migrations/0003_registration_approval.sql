@@ -4,7 +4,7 @@ create or replace function public.approve_registration(
   p_class_id uuid,
   p_registration_number text,
   p_email text default null,
-  p_actor uuid
+  p_actor uuid default null
 )
 returns uuid
 language plpgsql
@@ -54,5 +54,5 @@ begin
   return new_student;
 end $$;
 
-revoke all on function public.approve_registration(uuid,uuid,text,text) from public,anon,authenticated;
-grant execute on function public.approve_registration(uuid,uuid,text,text) to service_role;
+revoke all on function public.approve_registration(uuid,uuid,text,text,uuid) from public,anon,authenticated;
+grant execute on function public.approve_registration(uuid,uuid,text,text,uuid) to service_role;
