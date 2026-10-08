@@ -14,11 +14,27 @@ function AdminLoginPage() {
   const [busy, setBusy] = useState(false);
 
   useEffect(() => {
-    requireSupabase().auth.getUser().then(({ data }) => {
-      if (data.user && (data.user.app_metadata?.role === "admin" || data.user.app_metadata?.admin === true)) {
-        void navigate({ to: "/admin" });
-      }
-    });
+    let active = true;
+    const supabase = requireSupabase();
+    const timeout = new Promise<never>((_, reject) =>
+      window.setTimeout(() => reject(new Error("AUTH_TIMEOUT")), 8000),
+    );
+
+    Promise.race([supabase.auth.getUser(), timeout])
+      .then((result) => {
+        if (!active) return;
+        const { data } = result as Awaited<ReturnType<typeof supabase.auth.getUser>>;
+        if (data.user && (data.user.app_metadata?.role === "admin" || data.user.app_metadata?.admin === true)) {
+          void navigate({ to: "/admin" });
+        }
+      })
+      .catch(() => {
+        // Sem sessão ou Supabase indisponível: manter o formulário disponível.
+      });
+
+    return () => {
+      active = false;
+    };
   }, [navigate]);
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
@@ -26,19 +42,23 @@ function AdminLoginPage() {
     setMessage("");
     setBusy(true);
 
-    const { error } = await requireSupabase().auth.signInWithOtp({
-      email,
-      options: { emailRedirectTo: window.location.origin + "/admin" },
-    });
+    try {
+      const { error } = await requireSupabase().auth.signInWithOtp({
+        email: email.trim(),
+        options: { emailRedirectTo: window.location.origin + "/admin" },
+      });
 
-    if (error) {
-      setMessage("Não foi possível enviar o acesso. Verifique o e-mail institucional e a configuração de autenticação.");
+      if (error) {
+        setMessage("Não foi possível enviar o acesso. Verifique o e-mail institucional e a configuração de autenticação.");
+        return;
+      }
+
+      setMessage("Enviámos um link seguro para o e-mail indicado. O acesso só será permitido se a conta tiver permissão administrativa.");
+    } catch {
+      setMessage("O serviço de autenticação não respondeu. Tente novamente.");
+    } finally {
       setBusy(false);
-      return;
     }
-
-    setMessage("Enviámos um link seguro para o e-mail indicado. O acesso só será permitido se a conta tiver permissão administrativa.");
-    setBusy(false);
   }
 
   return (
@@ -77,7 +97,7 @@ function AdminLoginPage() {
         </form>
 
         <div className="mt-6 text-center">
-          <Link to="/" className="text-sm font-semibold text-slate-700 hover:text-amber-700">Voltar ao site público</Link>
+          <Link to="/portal" className="text-sm font-semibold text-slate-700 hover:text-amber-700">Voltar ao portal de acesso</Link>
         </div>
       </section>
     </main>
