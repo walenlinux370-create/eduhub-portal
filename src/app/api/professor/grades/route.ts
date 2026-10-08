@@ -21,10 +21,8 @@ export async function POST(req:Request){
  if(!student) return NextResponse.json({error:"student_not_found"},{status:404});
  const {data:grade,error}=await supabaseAdmin.from("grades").upsert({
   student_id:d.student_id,subject_id:d.subject_id,class_id:d.class_id,academic_year:d.academic_year,
-  trimester:d.trimester,teacher_id:teacher.id,component_scores:d.component_scores,state:d.state
+  trimester:d.trimester,component_scores:d.component_scores,state:d.state
  },{onConflict:"student_id,subject_id,trimester,academic_year"}).select("id,student_id,subject_id,class_id,academic_year,trimester,component_scores,final_grade,state,published_at").single();
  if(error||!grade) return NextResponse.json({error:"unable_to_save"},{status:400});
- const {data:finalGrade,error:finalError}=await supabaseAdmin.rpc("set_final_grade",{p_grade_id:grade.id});
- if(finalError) return NextResponse.json({error:"unable_to_finalize"},{status:400});
- return NextResponse.json({grade:{...grade,final_grade:finalGrade}},{status:201});
+ return NextResponse.json({grade},{status:201});
 }
