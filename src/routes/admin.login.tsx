@@ -2,7 +2,6 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { FormEvent, useState } from "react";
 import { ShieldCheck } from "lucide-react";
 import { isSupabaseConfigured, requireSupabase } from "@/lib/supabase";
-import { checkAuthRuntime, establishAdminSession, signInAdmin } from "@/lib/supabase/auth.functions";
 
 export const Route = createFileRoute("/admin/login")({
   head: () => ({ meta: [{ title: "Acesso administrativo — Escola Jossyquina" }, { name: "robots", content: "noindex,nofollow" }] }),
@@ -26,54 +25,66 @@ function AdminLogin() {
     setError("");
 
     try {
-      await checkAuthRuntime();
-      const signed = await signInAdmin({
-        data: {
-          email: email.trim(),
-          password,
-        },
+      // Fluxo administrativo: autenticação direta no browser -> perfil -> MFA -> painel.
+      // Não usamos Server Functions para o primeiro login, para que o Supabase Auth
+      // possa criar e persistir a sessão diretamente no cliente.
+      const supabase = requireSupabase();
+
+      const signed = await supabase.auth.signInWithPassword({
+        email: email.trim(),
+        password,
       });
 
-      if (!signed.ok) {
-        throw new Error("A autenticação administrativa não foi concluída.");
+      if (signed.error) {
+        throw new Error("Falha na autenticação: " + signed.error.message);
       }
 
-      const supabase = requireSupabase();
-      const sessionCheck = await supabase.auth.getSession();
-
-      if (sessionCheck.error) {
-        throw sessionCheck.error;
+      if (!signed.data.user?.id || !signed.data.session) {
+        throw new Error("O Supabase autenticou a conta, mas não criou uma sessão válida.");
       }
 
-      if (!sessionCheck.data.session?.user?.id) {
-        throw new Error(
-          "O servidor autenticou a conta, mas a sessão não chegou ao navegador. Verifique os cookies da aplicação.",
-        );
+      const userId = signed.data.user.id;
+
+      const profileResult = await supabase
+        .from("user_profiles")
+        .select("display_name,role,is_active")
+        .eq("id", userId)
+        .maybeSingle();
+
+      if (profileResult.error) {
+        await supabase.auth.signOut();
+        throw new Error("Não foi possível validar o perfil administrativo: " + profileResult.error.message);
       }
 
-      if (signed.currentLevel === "aal2") {
+      const profile = profileResult.data;
+
+      if (!profile || profile.role !== "admin" || profile.is_active !== true) {
+        await supabase.auth.signOut();
+        throw new Error("Esta conta não possui permissões administrativas ativas.");
+      }
+
+      const aalResult = await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
+
+      if (aalResult.error) {
+        throw new Error("Não foi possível verificar o estado MFA: " + aalResult.error.message);
+      }
+
+      if (aalResult.data.currentLevel === "aal2") {
         window.location.assign("/admin");
         return;
       }
 
-      if (signed.nextLevel === "aal2") {
-        const factors = await supabase.auth.mfa.listFactors();
+      const verifiedFactor = aalResult.data.nextLevel === "aal2"
+        ? (await supabase.auth.mfa.listFactors()).data?.totp.find((f) => f.status === "verified")
+        : undefined;
 
-        if (factors.error) {
-          throw factors.error;
-        }
-
-        const factor = factors.data.totp.find((f) => f.status === "verified");
-
-        if (!factor) {
-          throw new Error("Não existe um fator MFA verificado para esta conta administrativa.");
-        }
-
-        setFactorId(factor.id);
+      if (aalResult.data.nextLevel === "aal2" && verifiedFactor) {
+        setFactorId(verifiedFactor.id);
         setStep("mfa");
         return;
       }
 
+      // Primeira entrada administrativa: configurar o TOTP e, depois, verificar o código.
       const enrolled = await supabase.auth.mfa.enroll({
         factorType: "totp",
         friendlyName: "Jossyquina Admin",
@@ -141,17 +152,6 @@ function AdminLogin() {
         throw new Error(
           "A sessão administrativa não ficou disponível após a verificação MFA.",
         );
-      }
-
-      const persisted = await establishAdminSession({
-        data: {
-          access_token: result.data.access_token,
-          refresh_token: result.data.refresh_token,
-        },
-      });
-
-      if (!persisted.ok) {
-        throw new Error("A sessão administrativa não foi estabelecida no servidor.");
       }
 
       window.location.assign("/admin");
