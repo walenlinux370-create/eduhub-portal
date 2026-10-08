@@ -83,7 +83,6 @@ export function SiteFooter() {
               <li key={n.to}><Link to={n.to} className="hover:text-gold">{n.label}</Link></li>
             ))}
           </ul>
-          <Link to="/admin/login" className="mt-4 inline-flex text-xs font-semibold text-yellow-300 hover:text-yellow-200">Acesso administrativo</Link>
         </div>
       </div>
       <div className="border-t border-primary-foreground/10 py-5 text-center text-xs text-primary-foreground/50">
