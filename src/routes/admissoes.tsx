@@ -1,6 +1,8 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { PageHeader, Section, btnPrimary } from "@/components/site/SiteLayout";
 
+const ENROLLMENT_POSTER_URL = "https://raw.githubusercontent.com/walenlinux370-create/jossyquina/main/assets/matriculas.webp";
+
 export const Route = createFileRoute("/admissoes")({
   head: () => ({
     meta: [
@@ -24,6 +26,11 @@ function Admissoes() {
   return (
     <>
       <PageHeader eyebrow="Ano lectivo 2027" title="Admissões e matrículas" intro="Inscrições abertas até 30 de Novembro. Vagas limitadas por turma." />
+      <Section>
+        <div className="mb-12 overflow-hidden rounded-xl border border-border bg-card shadow-card">
+          <img src={ENROLLMENT_POSTER_URL} alt="Cartaz oficial de matrículas 2027" className="mx-auto max-h-[620px] w-full object-contain" />
+        </div>
+      </Section>
       <Section className="grid gap-12 md:grid-cols-2">
         <div>
           <h2 className="text-3xl font-semibold text-primary">Como se inscrever</h2>
