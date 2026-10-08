@@ -58,7 +58,6 @@ export interface FileRouteTypes {
   fullPaths: '/' | '/admissoes' | '/contactos' | '/ensino' | '/noticias' | '/privacidade' | '/sobre' | '/portal' | '/admin' | '/admin/login'
   fileRoutesByTo: FileRoutesByTo
   fileRoutesById: FileRoutesById
-  fileRoutesById: FileRoutesById
   fileRoutesByTo: FileRoutesByTo
   to: '/' | '/admissoes' | '/contactos' | '/ensino' | '/noticias' | '/privacidade' | '/sobre' | '/portal' | '/admin' | '/admin/login'
   id: '__root__' | '/' | '/admissoes' | '/contactos' | '/ensino' | '/noticias' | '/privacidade' | '/sobre' | '/portal' | '/admin' | '/admin/login'
