@@ -1,5 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import hero from "@/assets/hero-escola.jpg";
+
+const ENROLLMENT_POSTER_URL = "https://raw.githubusercontent.com/walenlinux370-create/jossyquina/main/assets/matriculas.webp";
 import { Section, btnGold, btnOutline, btnPrimary } from "@/components/site/SiteLayout";
 import { news } from "@/lib/news";
 
@@ -43,6 +45,15 @@ function Index() {
       </section>
 
       <Section>
+        <div className="mb-12 grid items-center gap-8 rounded-xl border border-border bg-card p-6 shadow-card md:grid-cols-[1.1fr_1fr] md:p-8">
+          <div>
+            <p className="eyebrow">Matrículas 2027</p>
+            <h2 className="mt-2 text-3xl font-semibold text-primary">Garanta a vaga do seu educando</h2>
+            <p className="mt-3 max-w-xl text-muted-foreground">Consulte o calendário, os documentos necessários e fale com a secretaria para iniciar o processo de matrícula.</p>
+            <Link to="/admissoes" className={btnGold + " mt-6"}>Ver informações de matrícula</Link>
+          </div>
+          <img src={ENROLLMENT_POSTER_URL} alt="Cartaz oficial de matrículas da Escola Comunitária Jossyquina" className="w-full rounded-lg object-contain" loading="lazy" />
+        </div>
         <div className="grid gap-10 md:grid-cols-3">
           {pillars.map((p) => (
             <div key={p.n} className="border-t-2 border-gold pt-6">
