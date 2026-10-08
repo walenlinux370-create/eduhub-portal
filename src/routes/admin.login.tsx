@@ -26,6 +26,16 @@ function AdminLogin() {
       const supabase = requireSupabase();
       const signed = await supabase.auth.signInWithPassword({ email: email.trim(), password });
       if (signed.error) throw signed.error;
+      if (!signed.data.session?.user?.id) {
+        throw new Error("O Supabase autenticou a conta, mas não criou uma sessão no navegador.");
+      }
+
+      const sessionCheck = await supabase.auth.getSession();
+      if (sessionCheck.error) throw sessionCheck.error;
+      if (!sessionCheck.data.session?.user?.id) {
+        throw new Error("A sessão autenticada não ficou disponível no navegador.");
+      }
+
       const aal = await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
       if (aal.error) throw aal.error;
       if (aal.data.currentLevel === "aal2") return navigate({ to: "/admin", replace: true });
@@ -39,8 +49,9 @@ function AdminLogin() {
       const enrolled = await supabase.auth.mfa.enroll({ factorType: "totp", friendlyName: "Jossyquina Admin" });
       if (enrolled.error) throw enrolled.error;
       setFactorId(enrolled.data.id); setQr(enrolled.data.totp.qr_code); setSecret(enrolled.data.totp.secret); setStep("enroll");
-    } catch {
-      setError("Não foi possível iniciar a sessão. Verifique as credenciais e tente novamente.");
+    } catch (error) {
+      console.error("Admin password login failed:", error);
+      setError(error instanceof Error ? error.message : "Não foi possível iniciar a sessão.");
     } finally { setBusy(false); }
   }
 
@@ -53,14 +64,36 @@ function AdminLogin() {
       const result = await supabase.auth.mfa.verify({ factorId, challengeId: challenge.data.id, code });
       if (result.error) throw result.error;
 
-      const sessionResult = await supabase.auth.getSession();
+      let sessionResult = await supabase.auth.getSession();
+      if (sessionResult.error) throw sessionResult.error;
+
+      if (!sessionResult.data.session?.user?.id) {
+        await new Promise<void>((resolve, reject) => {
+          const timer = window.setTimeout(() => {
+            subscription.unsubscribe();
+            reject(new Error("Auth session missing!"));
+          }, 5000);
+
+          const { data: subscription } = supabase.auth.onAuthStateChange((event, session) => {
+            if ((event === "SIGNED_IN" || event === "TOKEN_REFRESHED" || event === "MFA_CHALLENGE_VERIFIED") && session?.user?.id) {
+              window.clearTimeout(timer);
+              subscription.unsubscribe();
+              resolve();
+            }
+          });
+        });
+
+        sessionResult = await supabase.auth.getSession();
+      }
+
       if (sessionResult.error || !sessionResult.data.session?.user?.id) {
         throw sessionResult.error ?? new Error("A sessão não ficou disponível após a verificação MFA.");
       }
 
       await navigate({ to: "/admin", replace: true });
-    } catch {
-      setError(step === "enroll" ? "Não foi possível ativar o MFA. Confirme o código." : "Código de autenticação inválido.");
+    } catch (error) {
+      console.error("Admin MFA verification failed:", error);
+      setError(error instanceof Error ? error.message : (step === "enroll" ? "Não foi possível ativar o MFA. Confirme o código." : "Código de autenticação inválido."));
     } finally { setBusy(false); }
   }
 
