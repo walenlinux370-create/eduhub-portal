@@ -7,7 +7,7 @@ as $$
 declare u text := trim(p_url);
 begin
   if u is null or u='' then return null; end if;
-  if u !~ '^https://(www\\.)?(youtube\\.com|youtube-nocookie\\.com)/' then
+  if u !~ '^https://(www\.)?(youtube\.com|youtube-nocookie\.com)/' then
     raise exception 'video_origin_rejected';
   end if;
   return u;
