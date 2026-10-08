@@ -1,0 +1,9 @@
+ALTER TYPE public.app_role ADD VALUE IF NOT EXISTS 'director_class';
+ALTER TYPE public.app_role ADD VALUE IF NOT EXISTS 'secretary';
+ALTER TYPE public.app_role ADD VALUE IF NOT EXISTS 'director';
+ALTER TYPE public.app_role ADD VALUE IF NOT EXISTS 'guardian';
+ALTER TYPE public.app_role ADD VALUE IF NOT EXISTS 'tutelar';
+ALTER TYPE public.grade_state ADD VALUE IF NOT EXISTS 'submitted';
+ALTER TYPE public.grade_state ADD VALUE IF NOT EXISTS 'reviewed';
+ALTER TYPE public.grade_state ADD VALUE IF NOT EXISTS 'approved';
+ALTER TYPE public.grade_state ADD VALUE IF NOT EXISTS 'returned';
