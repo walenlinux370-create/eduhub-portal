@@ -39,6 +39,7 @@ export function AdminShell({ children }: { children: ReactNode }) {
   const navigate = useNavigate();
   const [ready, setReady] = useState(false);
   const [name, setName] = useState("Administrador");
+  const [checkStage, setCheckStage] = useState("A iniciar a validação…");
 
   useEffect(() => {
     let alive = true;
@@ -47,6 +48,7 @@ export function AdminShell({ children }: { children: ReactNode }) {
       try {
         const supabase = requireSupabase();
 
+        if (alive) setCheckStage("A validar a sessão segura…");
         const claimsResult = await withTimeout(
           supabase.auth.getClaims(),
           "A validação da sessão demorou demasiado tempo.",
@@ -59,6 +61,7 @@ export function AdminShell({ children }: { children: ReactNode }) {
         const claims = claimsResult.data.claims;
         const userId = claims.sub;
 
+        if (alive) setCheckStage("A validar o perfil de administrador e o MFA…");
         const [profileResult, aalResult] = await withTimeout(
           Promise.all([
             supabase
@@ -72,7 +75,7 @@ export function AdminShell({ children }: { children: ReactNode }) {
         );
 
         if (profileResult.error) {
-          throw profileResult.error;
+          throw new Error(`Perfil administrativo: ${profileResult.error.message}`);
         }
 
         const profile = profileResult.data;
@@ -97,6 +100,7 @@ export function AdminShell({ children }: { children: ReactNode }) {
       } catch (error) {
         console.error("Admin session check failed:", error);
         if (alive) {
+          setCheckStage("A sessão não foi validada. A regressar ao login…");
           void navigate({ to: "/admin/login", replace: true });
         }
       }
@@ -119,9 +123,7 @@ export function AdminShell({ children }: { children: ReactNode }) {
       <div className="flex min-h-screen items-center justify-center bg-background px-6">
         <div className="w-full max-w-md rounded-2xl border bg-background p-6 text-center shadow-sm">
           <p className="text-sm font-semibold text-primary">A verificar sessão administrativa…</p>
-          <p className="mt-2 text-xs text-muted-foreground">
-            A validação de segurança pode demorar alguns segundos.
-          </p>
+          <p className="mt-2 text-xs text-muted-foreground">{checkStage}</p>
         </div>
       </div>
     );
