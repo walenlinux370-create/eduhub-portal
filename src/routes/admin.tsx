@@ -15,7 +15,7 @@ import {
   X,
 } from "lucide-react";
 import { requireSupabase } from "@/lib/supabase";
-import { ADMINEDU_SYSTEM_PROMPT, CRITICAL_ACTIONS } from "@/lib/adminedu/policy";
+import { CRITICAL_ACTIONS } from "@/lib/adminedu/policy";
 
 export const Route = createFileRoute("/admin")({
   component: AdminEduPage,
@@ -179,11 +179,6 @@ function AdminEduPage() {
             </div>
           </div>
         </section>
-
-        <details className="mt-8 rounded-xl border bg-white p-5">
-          <summary className="cursor-pointer font-semibold">Política AdminEdu</summary>
-          <p className="mt-3 whitespace-pre-wrap text-xs leading-5 text-slate-600">{ADMINEDU_SYSTEM_PROMPT}</p>
-        </details>
 
         <div className="mt-8 text-sm">
           <Link to="/" className="font-semibold text-slate-700 hover:text-amber-700">← Voltar ao site público</Link>
