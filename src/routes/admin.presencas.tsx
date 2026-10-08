@@ -35,7 +35,9 @@ function PresencasPage(){
     if(c.error||s.error){setMessage(c.error?.message||s.error?.message||"Erro ao carregar dados.");return;}
     setClasses(c.data??[]);setSubjects(s.data??[]);
     if(!classId&&c.data?.[0])setClassId(c.data[0].id);
-    if(!subjectId&&s.data?.[0])setSubjectId(s.data[0].id);
+    const firstClass=c.data?.[0];
+    const firstSubject=s.data?.find(x=>firstClass?x.min_level<=firstClass.level&&x.max_level>=firstClass.level:true);
+    if(firstSubject) setSubjectId(firstSubject.id);
   }
 
   async function loadSheet(){
