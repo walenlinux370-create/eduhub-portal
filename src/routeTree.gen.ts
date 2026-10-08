@@ -79,11 +79,12 @@ export interface FileRoutesById {
   '/ensino': typeof EnsinoRoute
   '/noticias': typeof NoticiasRoute
   '/sobre': typeof SobreRoute
+  '/privacidade': typeof PrivacidadeRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
-    '/' | '/admissoes' | '/contactos' | '/ensino' | '/noticias' | '/sobre'
+    '/' | '/admissoes' | '/contactos' | '/ensino' | '/noticias' | '/sobre' | '/privacidade'
   fileRoutesByTo: FileRoutesByTo
   to: '/' | '/admissoes' | '/contactos' | '/ensino' | '/noticias' | '/sobre' | '/privacidade'
   id:
@@ -94,6 +95,7 @@ export interface FileRouteTypes {
     | '/ensino'
     | '/noticias'
     | '/sobre'
+    | '/privacidade'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -148,6 +150,13 @@ declare module '@tanstack/react-router' {
       path: '/sobre'
       fullPath: '/sobre'
       preLoaderRoute: typeof SobreRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/privacidade': {
+      id: '/privacidade'
+      path: '/privacidade'
+      fullPath: '/privacidade'
+      preLoaderRoute: typeof PrivacidadeRouteImport
       parentRoute: typeof rootRouteImport
     }
   }
