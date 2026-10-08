@@ -2,6 +2,7 @@ import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
 import { FormEvent, useState } from "react";
 import { ShieldCheck } from "lucide-react";
 import { isSupabaseConfigured, requireSupabase } from "@/lib/supabase";
+import { establishAdminSession } from "@/lib/supabase/auth.functions";
 
 export const Route = createFileRoute("/admin/login")({
   head: () => ({ meta: [{ title: "Acesso administrativo — Escola Jossyquina" }, { name: "robots", content: "noindex,nofollow" }] }),
