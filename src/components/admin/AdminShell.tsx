@@ -58,17 +58,7 @@ export function AdminShell({ children }: { children: ReactNode }) {
         if (sessionResult.error) throw sessionResult.error;
 
         if (!sessionResult.data.session?.user?.id) {
-          if (alive) setCheckStage("A renovar a sessão segura…");
-          const refreshResult = await withTimeout(
-            supabase.auth.refreshSession(),
-            "Não foi possível renovar a sessão administrativa.",
-          );
-          if (refreshResult.error) throw refreshResult.error;
-          sessionResult = refreshResult;
-        }
-
-        if (!sessionResult.data.session?.user?.id) {
-          throw new Error("Sessão administrativa inexistente.");
+          throw new Error("Sessão administrativa inexistente. Volte ao login e autentique-se novamente.");
         }
 
         const user = sessionResult.data.session.user;
