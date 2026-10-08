@@ -9,6 +9,7 @@ const nav = [
   { to: "/noticias", label: "Notícias" },
   { to: "/contactos", label: "Contactos" },
   { to: "/privacidade", label: "Privacidade" },
+  { to: "/portal", label: "Portal administrativo" },
 ] as const;
 
 const LOGO_URL = "https://raw.githubusercontent.com/walenlinux370-create/jossyquina/main/assets/logo.webp";
