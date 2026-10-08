@@ -49,54 +49,84 @@ export function AdminShell({ children }: { children: ReactNode }) {
       try {
         const supabase = requireSupabase();
 
-        if (alive) setCheckStage("A validar a sessão segura…");
+        if (alive) setCheckStage("A recuperar a sessão administrativa…");
+        const sessionResult = await withTimeout(
+          supabase.auth.getSession(),
+          "A recuperação da sessão demorou demasiado tempo.",
+        );
+
+        if (sessionResult.error) {
+          throw new Error("Não foi possível recuperar a sessão: " + sessionResult.error.message);
+        }
+
+        if (!sessionResult.data.session?.user?.id) {
+          if (alive) {
+            await navigate({ to: "/admin/login", replace: true });
+          }
+          return;
+        }
+
+        if (alive) setCheckStage("A confirmar a identidade…");
         const userResult = await withTimeout(
           supabase.auth.getUser(),
           "A validação da identidade demorou demasiado tempo.",
         );
 
-        if (userResult.error) throw userResult.error;
-        if (!userResult.data.user?.id) {
-          throw new Error("Sessão administrativa inexistente. Volte ao login e autentique-se novamente.");
+        if (userResult.error || !userResult.data.user?.id) {
+          await supabase.auth.signOut();
+          if (alive) {
+            await navigate({ to: "/admin/login", replace: true });
+          }
+          return;
         }
 
         const user = userResult.data.user;
         const userId = user.id;
 
-        if (alive) setCheckStage("A validar o perfil de administrador e o MFA…");
-        const [profileResult, aalResult] = await withTimeout(
-          Promise.all([
-            supabase
-              .from("user_profiles")
-              .select("display_name,role,is_active")
-              .eq("id", userId)
-              .maybeSingle(),
-            supabase.auth.mfa.getAuthenticatorAssuranceLevel(),
-          ]),
-          "A validação administrativa demorou demasiado tempo.",
+        if (alive) setCheckStage("A validar o perfil de administrador…");
+        const profileResult = await withTimeout(
+          supabase
+            .from("user_profiles")
+            .select("display_name,role,is_active")
+            .eq("id", userId)
+            .maybeSingle(),
+          "A validação do perfil administrativo demorou demasiado tempo.",
         );
 
         if (profileResult.error) {
-          throw new Error(`Perfil administrativo: ${profileResult.error.message}`);
+          throw new Error("Perfil administrativo: " + profileResult.error.message);
         }
 
         const profile = profileResult.data;
-        if (
-          !profile ||
-          profile.role !== "admin" ||
-          profile.is_active !== true ||
-          aalResult.error ||
-          aalResult.data.currentLevel !== "aal2"
-        ) {
-          void supabase.auth.signOut();
+        if (!profile || profile.role !== "admin" || profile.is_active !== true) {
+          await supabase.auth.signOut();
           if (alive) {
-            void navigate({ to: "/admin/login", replace: true });
+            await navigate({ to: "/admin/login", replace: true });
+          }
+          return;
+        }
+
+        if (alive) setCheckStage("A confirmar o MFA e o nível AAL2…");
+        const aalResult = await withTimeout(
+          supabase.auth.mfa.getAuthenticatorAssuranceLevel(),
+          "A validação do MFA demorou demasiado tempo.",
+        );
+
+        if (aalResult.error) {
+          throw new Error("Não foi possível validar o MFA: " + aalResult.error.message);
+        }
+
+        if (aalResult.data.currentLevel !== "aal2") {
+          await supabase.auth.signOut();
+          if (alive) {
+            await navigate({ to: "/admin/login", replace: true });
           }
           return;
         }
 
         if (alive) {
           setName(profile.display_name || String(user.email ?? "Administrador"));
+          setCheckStage("Sessão administrativa validada.");
           setReady(true);
         }
       } catch (error) {
