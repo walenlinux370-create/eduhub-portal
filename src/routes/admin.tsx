@@ -41,20 +41,30 @@ function AdminEduPage() {
     let active = true;
     const supabase = requireSupabase();
 
-    supabase.auth.getUser().then(({ data, error: authError }) => {
-      if (!active) return;
-      if (authError || !data.user) {
-        void navigate({ to: "/admin/login" });
-        return;
-      }
-      if (!isAdmin(data.user)) {
-        setError("A sua conta está autenticada, mas não possui permissão administrativa.");
+    const timeout = new Promise<never>((_, reject) =>
+      window.setTimeout(() => reject(new Error("AUTH_TIMEOUT")), 8000),
+    );
+
+    Promise.race([supabase.auth.getUser(), timeout])
+      .then((result) => {
+        if (!active) return;
+        const { data, error: authError } = result as Awaited<ReturnType<typeof supabase.auth.getUser>>;
+        if (authError || !data.user) {
+          void navigate({ to: "/admin/login" });
+          return;
+        }
+        if (!isAdmin(data.user)) {
+          setError("A sua conta está autenticada, mas não possui permissão administrativa.");
+          setLoading(false);
+          return;
+        }
+        setUser(data.user);
         setLoading(false);
-        return;
-      }
-      setUser(data.user);
-      setLoading(false);
-    });
+      })
+      .catch(() => {
+        if (!active) return;
+        void navigate({ to: "/admin/login" });
+      });
 
     const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
       if (!active) return;
