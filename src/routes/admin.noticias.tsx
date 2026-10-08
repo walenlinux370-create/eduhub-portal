@@ -2,6 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { AdminShell } from "@/components/admin/AdminShell";
 import { requireSupabase } from "@/lib/supabase";
+import DOMPurify from "dompurify";
 
 type News={id:string;slug:string;title:string;excerpt:string;body_html:string;video_url:string|null;published:boolean;published_at:string|null;created_at:string};
 
@@ -43,7 +44,8 @@ function AdminNoticiasPage(){
     if(form.video_url&&!/^https:\/\/(www\.)?(youtube\.com|youtu\.be)\//.test(form.video_url)){setMessage("O vídeo deve ser do YouTube.");return}
     setBusy(true);
     try{
-      const payload={slug,title:form.title.trim(),excerpt:form.excerpt.trim(),body_html:form.body_html,video_url:form.video_url.trim()||null,published:form.published};
+      const cleanBody=DOMPurify.sanitize(form.body_html,{USE_PROFILES:{html:true},FORBID_TAGS:["style","form","iframe","object","embed"],FORBID_ATTR:["style","srcset"]});
+      const payload={slug,title:form.title.trim(),excerpt:form.excerpt.trim(),body_html:cleanBody,video_url:form.video_url.trim()||null,published:form.published};
       const r=editing?await supabase.from("news").update(payload).eq("id",editing):await supabase.from("news").insert(payload);
       if(r.error)throw r.error;
       setMessage(editing?"Notícia atualizada.":"Notícia criada.");
