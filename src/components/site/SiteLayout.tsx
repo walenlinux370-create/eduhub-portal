@@ -82,6 +82,7 @@ export function SiteFooter() {
             {nav.slice(1).map((n) => (
               <li key={n.to}><Link to={n.to} className="hover:text-gold">{n.label}</Link></li>
             ))}
+            <li><Link to="/portal" className="font-semibold text-gold hover:text-primary-foreground">Portal administrativo</Link></li>
           </ul>
         </div>
       </div>
