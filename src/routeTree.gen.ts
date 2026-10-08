@@ -15,6 +15,7 @@ import { Route as ContactosRouteImport } from './routes/contactos'
 import { Route as EnsinoRouteImport } from './routes/ensino'
 import { Route as NoticiasRouteImport } from './routes/noticias'
 import { Route as SobreRouteImport } from './routes/sobre'
+import { Route as PrivacidadeRouteImport } from './routes/privacidade'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -46,6 +47,11 @@ const SobreRoute = SobreRouteImport.update({
   path: '/sobre',
   getParentRoute: () => rootRouteImport,
 } as any)
+const PrivacidadeRoute = PrivacidadeRouteImport.update({
+  id: '/privacidade',
+  path: '/privacidade',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -54,6 +60,7 @@ export interface FileRoutesByFullPath {
   '/ensino': typeof EnsinoRoute
   '/noticias': typeof NoticiasRoute
   '/sobre': typeof SobreRoute
+  '/privacidade': typeof PrivacidadeRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -62,6 +69,7 @@ export interface FileRoutesByTo {
   '/ensino': typeof EnsinoRoute
   '/noticias': typeof NoticiasRoute
   '/sobre': typeof SobreRoute
+  '/privacidade': typeof PrivacidadeRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -94,7 +102,8 @@ export interface RootRouteChildren {
   ContactosRoute: typeof ContactosRoute
   EnsinoRoute: typeof EnsinoRoute
   NoticiasRoute: typeof NoticiasRoute
-  SobreRoute: typeof SobreRoute
+  SobreRoute: typeof SobreRoute,
+  PrivacidadeRoute: typeof PrivacidadeRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -151,6 +160,7 @@ const rootRouteChildren: RootRouteChildren = {
   EnsinoRoute: EnsinoRoute,
   NoticiasRoute: NoticiasRoute,
   SobreRoute: SobreRoute,
+  PrivacidadeRoute: PrivacidadeRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
