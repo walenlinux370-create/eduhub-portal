@@ -13,7 +13,8 @@ export default async function Page(){
     supabase.from("schedules").select("id,weekday,starts_at,ends_at,room,subject_id,subjects(name)").order("weekday").order("starts_at"),
     supabase.from("materials").select("id,title,mime_type,size_bytes,created_at,subject_id,subjects(name)").order("created_at",{ascending:false})
   ]);
-  const grades=gradesResult.data??[], attendance=attendanceResult.data??[], schedules=scheduleResult.data??[], materials=materialsResult.data??[];\n  const materialsWithLinks=await Promise.all(materials.map(async m=>{ const {data}=await supabase.storage.from("materials").createSignedUrl(m.storage_path,3600); return {...m,download_url:data?.signedUrl??null}; }));
+  const grades=gradesResult.data??[], attendance=attendanceResult.data??[], schedules=scheduleResult.data??[], materials=materialsResult.data??[];
+  const materialsWithLinks=await Promise.all(materials.map(async m=>{ const {data}=await supabase.storage.from("materials").createSignedUrl(m.storage_path,3600); return {...m,download_url:data?.signedUrl??null}; }));
   const present=attendance.filter(a=>a.present).length, absent=attendance.filter(a=>!a.present).length;
 
   return <main className="container-site py-10">
