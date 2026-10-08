@@ -83,9 +83,9 @@ export function AdminShell({ children }: { children: ReactNode }) {
           aalResult.error ||
           aalResult.data.currentLevel !== "aal2"
         ) {
-          await supabase.auth.signOut();
+          void supabase.auth.signOut();
           if (alive) {
-            await navigate({ to: "/admin/login", replace: true });
+            void navigate({ to: "/admin/login", replace: true });
           }
           return;
         }
@@ -97,7 +97,7 @@ export function AdminShell({ children }: { children: ReactNode }) {
       } catch (error) {
         console.error("Admin session check failed:", error);
         if (alive) {
-          await navigate({ to: "/admin/login", replace: true });
+          void navigate({ to: "/admin/login", replace: true });
         }
       }
     }
