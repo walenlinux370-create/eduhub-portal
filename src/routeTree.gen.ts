@@ -103,19 +103,19 @@ export interface FileRoutesByFullPath {
   '/noticias': typeof NoticiasRouteRoute
   '/sobre': typeof SobreRouteRoute
   '/privacidade': typeof PrivacidadeRouteRoute
-  '/admin': typeof AdminRouteRoute
-  '/admin/login': typeof AdminLoginRouteRoute
-  '/admin/redefinir': typeof AdminRedefinirRouteRoute
-  '/admin/alunos': typeof AdminAlunosRouteRoute
-  '/admin/turmas': typeof AdminTurmasRouteRoute
-  '/admin/professores': typeof AdminProfessoresRouteRoute
-  '/admin/disciplinas': typeof AdminDisciplinasRouteRoute
-  '/admin/notas': typeof AdminNotasRouteRoute
-  '/admin/presencas': typeof AdminPresencasRouteRoute
-  '/admin/materiais': typeof AdminMateriaisRouteRoute
-  '/admin/noticias': typeof AdminNoticiasRouteRoute
-  '/admin/auditoria': typeof AdminAuditoriaRouteRoute
-  '/admin/definicoes': typeof AdminDefinicoesRouteRoute
+  '/admin': typeof AdminRoute
+  '/admin/login': typeof AdminLoginRoute
+  '/admin/redefinir': typeof AdminRedefinirRoute
+  '/admin/alunos': typeof AdminAlunosRoute
+  '/admin/turmas': typeof AdminTurmasRoute
+  '/admin/professores': typeof AdminProfessoresRoute
+  '/admin/disciplinas': typeof AdminDisciplinasRoute
+  '/admin/notas': typeof AdminNotasRoute
+  '/admin/presencas': typeof AdminPresencasRoute
+  '/admin/materiais': typeof AdminMateriaisRoute
+  '/admin/noticias': typeof AdminNoticiasRoute
+  '/admin/auditoria': typeof AdminAuditoriaRoute
+  '/admin/definicoes': typeof AdminDefinicoesRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRouteRoute
@@ -125,19 +125,19 @@ export interface FileRoutesByTo {
   '/noticias': typeof NoticiasRouteRoute
   '/sobre': typeof SobreRouteRoute
   '/privacidade': typeof PrivacidadeRouteRoute
-  '/admin': typeof AdminRouteRoute
-  '/admin/login': typeof AdminLoginRouteRoute
-  '/admin/redefinir': typeof AdminRedefinirRouteRoute
-  '/admin/alunos': typeof AdminAlunosRouteRoute
-  '/admin/turmas': typeof AdminTurmasRouteRoute
-  '/admin/professores': typeof AdminProfessoresRouteRoute
-  '/admin/disciplinas': typeof AdminDisciplinasRouteRoute
-  '/admin/notas': typeof AdminNotasRouteRoute
-  '/admin/presencas': typeof AdminPresencasRouteRoute
-  '/admin/materiais': typeof AdminMateriaisRouteRoute
-  '/admin/noticias': typeof AdminNoticiasRouteRoute
-  '/admin/auditoria': typeof AdminAuditoriaRouteRoute
-  '/admin/definicoes': typeof AdminDefinicoesRouteRoute
+  '/admin': typeof AdminRoute
+  '/admin/login': typeof AdminLoginRoute
+  '/admin/redefinir': typeof AdminRedefinirRoute
+  '/admin/alunos': typeof AdminAlunosRoute
+  '/admin/turmas': typeof AdminTurmasRoute
+  '/admin/professores': typeof AdminProfessoresRoute
+  '/admin/disciplinas': typeof AdminDisciplinasRoute
+  '/admin/notas': typeof AdminNotasRoute
+  '/admin/presencas': typeof AdminPresencasRoute
+  '/admin/materiais': typeof AdminMateriaisRoute
+  '/admin/noticias': typeof AdminNoticiasRoute
+  '/admin/auditoria': typeof AdminAuditoriaRoute
+  '/admin/definicoes': typeof AdminDefinicoesRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
