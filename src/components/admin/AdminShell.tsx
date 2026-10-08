@@ -47,22 +47,24 @@ export function AdminShell({ children }: { children: ReactNode }) {
       try {
         const supabase = requireSupabase();
 
-        const userResult = await withTimeout(
-          supabase.auth.getUser(),
-          "A sessão demorou demasiado tempo a responder.",
+        const claimsResult = await withTimeout(
+          supabase.auth.getClaims(),
+          "A validação da sessão demorou demasiado tempo.",
         );
 
-        const user = userResult.data.user;
-        if (!user) {
-          throw new Error("Sessão administrativa inexistente.");
+        if (claimsResult.error || !claimsResult.data?.claims?.sub) {
+          throw claimsResult.error ?? new Error("Sessão administrativa inexistente.");
         }
+
+        const claims = claimsResult.data.claims;
+        const userId = claims.sub;
 
         const [profileResult, aalResult] = await withTimeout(
           Promise.all([
             supabase
               .from("user_profiles")
               .select("display_name,role,is_active")
-              .eq("id", user.id)
+              .eq("id", userId)
               .maybeSingle(),
             supabase.auth.mfa.getAuthenticatorAssuranceLevel(),
           ]),
@@ -89,7 +91,7 @@ export function AdminShell({ children }: { children: ReactNode }) {
         }
 
         if (alive) {
-          setName(profile.display_name || user.email || "Administrador");
+          setName(profile.display_name || String(claims.email ?? "Administrador"));
           setReady(true);
         }
       } catch (error) {
