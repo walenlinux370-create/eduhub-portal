@@ -11,7 +11,7 @@ export default async function Page(){
     supabase.from("grades").select("id,subject_id,trimester,academic_year,final_grade,state,published_at,subjects(name)").eq("student_id",student.id).eq("state","published").order("academic_year",{ascending:false}).order("trimester",{ascending:true}),
     supabase.from("attendance").select("id,attendance_date,present,subject_id,subjects(name)").eq("student_id",student.id).order("attendance_date",{ascending:false}).limit(100),
     supabase.from("schedules").select("id,weekday,starts_at,ends_at,room,subject_id,subjects(name)").order("weekday").order("starts_at"),
-    supabase.from("materials").select("id,title,mime_type,size_bytes,created_at,subject_id,subjects(name)").order("created_at",{ascending:false})
+    supabase.from("materials").select("id,title,mime_type,size_bytes,created_at,subject_id,storage_path,subjects(name)").order("created_at",{ascending:false})
   ]);
   const grades=gradesResult.data??[], attendance=attendanceResult.data??[], schedules=scheduleResult.data??[], materials=materialsResult.data??[];
   const materialsWithLinks=await Promise.all(materials.map(async m=>{ const {data}=await supabase.storage.from("materials").createSignedUrl(m.storage_path,3600); return {...m,download_url:data?.signedUrl??null}; }));
