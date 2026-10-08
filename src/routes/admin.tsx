@@ -49,7 +49,7 @@ function Dashboard() {
         ["/admin/turmas", "Gestão académica", "Turmas, disciplinas e atribuições."],
         ["/admin/notas", "Avaliação", "Notas, publicação e histórico."],
         ["/admin/noticias", "Conteúdos", "Notícias e comunicação institucional."],
-      ].map(([to, title, desc]) => <Link key={to} to={to} className="rounded-lg border p-4 hover:border-yellow-400 hover:bg-yellow-50/50"><p className="font-semibold text-primary">{title}</p><p className="mt-1 text-sm text-muted-foreground">{desc}</p></Link>)}</div>
+      ].map(([to, title, desc]) => <Link key={to} to={to as string} className="rounded-lg border p-4 hover:border-yellow-400 hover:bg-yellow-50/50"><p className="font-semibold text-primary">{title}</p><p className="mt-1 text-sm text-muted-foreground">{desc}</p></Link>)}</div>
     </section>
   </AdminShell>;
 }

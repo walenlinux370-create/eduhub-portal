@@ -18,7 +18,7 @@ function Students(){
   db.from("students").select("id,full_name,registration_number,email,contact,status,class_id,classes(level,name,academic_year)").order("full_name"),
   db.from("classes").select("id,level,name,academic_year").order("level").order("name"),
   db.from("registration_requests").select("id,full_name,contact,guardian_name,guardian_contact,class_level,class_name,status,created_at").eq("status","pending").order("created_at",{ascending:false})
- ]);if(s.error||c.error||r.error)setMessage("Não foi possível carregar os dados. Verifique a sessão administrativa e as políticas RLS.");setStudents((s.data as Student[])||[]);setClasses(c.data||[]);setRequests(r.data||[]);setBusy(false)}
+ ]);if(s.error||c.error||r.error)setMessage("Não foi possível carregar os dados. Verifique a sessão administrativa e as políticas RLS.");setStudents((s.data as unknown as Student[])||[]);setClasses(c.data||[]);setRequests(r.data||[]);setBusy(false)}
  useEffect(()=>{load()},[]);
  const filtered=useMemo(()=>students.filter(s=>{const q=query.toLowerCase().trim();return(!q||s.full_name.toLowerCase().includes(q)||s.registration_number.toLowerCase().includes(q)||(s.email||"").toLowerCase().includes(q))&&(status==="all"||s.status===status)}),[students,query,status]);
  async function issueCode(s:Student){setBusy(true);setMessage("");const uid=(await db.auth.getUser()).data.user?.id;const {data,error}=await db.rpc("issue_student_auth_code",{p_student_id:s.id,p_actor:uid});if(error){setMessage("Não foi possível gerar o código de acesso.");setBusy(false);return}setSelected(s);setCode(data);setBusy(false);await load()}

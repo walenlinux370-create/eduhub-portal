@@ -60,7 +60,7 @@ function NotasPage(){
     setSelectedStudent(id);
     const g=gradeFor(id);
     const c=g?.component_scores||{};
-    setComponents({teste1:String(c.teste1??""),teste2:String(c.teste2??""),trabalho:String(c.trabalho??"")});
+    setComponents({teste1:String(c["teste1"]??""),teste2:String(c["teste2"]??""),trabalho:String(c["trabalho"]??"")});
     setMessage("");
   }
 
