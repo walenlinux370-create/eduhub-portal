@@ -64,33 +64,21 @@ function AdminLogin() {
       const result = await supabase.auth.mfa.verify({ factorId, challengeId: challenge.data.id, code });
       if (result.error) throw result.error;
 
-      let sessionResult = await supabase.auth.getSession();
+      if (!result.data?.access_token || !result.data?.refresh_token) {
+        throw new Error("O MFA foi verificado, mas o Supabase não devolveu os tokens da sessão.");
+      }
+
+      const sessionResult = await supabase.auth.setSession({
+        access_token: result.data.access_token,
+        refresh_token: result.data.refresh_token,
+      });
+
       if (sessionResult.error) throw sessionResult.error;
-
       if (!sessionResult.data.session?.user?.id) {
-        await new Promise<void>((resolve, reject) => {
-          const timer = window.setTimeout(() => {
-            subscription.unsubscribe();
-            reject(new Error("Auth session missing!"));
-          }, 5000);
-
-          const { data: subscription } = supabase.auth.onAuthStateChange((event, session) => {
-            if ((event === "SIGNED_IN" || event === "TOKEN_REFRESHED" || event === "MFA_CHALLENGE_VERIFIED") && session?.user?.id) {
-              window.clearTimeout(timer);
-              subscription.unsubscribe();
-              resolve();
-            }
-          });
-        });
-
-        sessionResult = await supabase.auth.getSession();
+        throw new Error("A sessão administrativa não ficou disponível após a verificação MFA.");
       }
 
-      if (sessionResult.error || !sessionResult.data.session?.user?.id) {
-        throw sessionResult.error ?? new Error("A sessão não ficou disponível após a verificação MFA.");
-      }
-
-      await navigate({ to: "/admin", replace: true });
+      window.location.assign("/admin");
     } catch (error) {
       console.error("Admin MFA verification failed:", error);
       setError(error instanceof Error ? error.message : (step === "enroll" ? "Não foi possível ativar o MFA. Confirme o código." : "Código de autenticação inválido."));
