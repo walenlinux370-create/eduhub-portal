@@ -8,23 +8,24 @@ const nav = [
   { to: "/admissoes", label: "Admissões" },
   { to: "/noticias", label: "Notícias" },
   { to: "/contactos", label: "Contactos" },
+  { to: "/privacidade", label: "Privacidade" },
 ] as const;
+
+const LOGO_URL = "https://raw.githubusercontent.com/walenlinux370-create/jossyquina/main/assets/logo.webp";
 
 export function SiteHeader() {
   const [open, setOpen] = useState(false);
   return (
     <header className="sticky top-0 z-40 border-b border-border bg-background/95 backdrop-blur">
-      <div className="mx-auto flex max-w-6xl items-center justify-between px-5 py-4">
-        <Link to="/" className="flex items-center gap-3">
-          <span className="flex h-11 w-11 items-center justify-center rounded-full border-2 border-gold bg-primary font-display text-lg font-bold text-gold">
-            J
-          </span>
+      <div className="mx-auto flex max-w-6xl items-center justify-between px-5 py-3">
+        <Link to="/" className="flex items-center gap-3" aria-label="Escola Comunitária Jossyquina — Início">
+          <img src={LOGO_URL} alt="Logótipo da Escola Comunitária Jossyquina" className="h-12 w-12 rounded-full object-contain" />
           <span className="leading-tight">
             <span className="block font-display text-lg font-semibold text-primary">Jossyquina</span>
             <span className="block text-xs uppercase tracking-[0.18em] text-muted-foreground">Escola Comunitária</span>
           </span>
         </Link>
-        <nav className="hidden items-center gap-7 md:flex">
+        <nav className="hidden items-center gap-6 lg:flex" aria-label="Navegação principal">
           {nav.map((n) => (
             <Link
               key={n.to}
@@ -38,15 +39,16 @@ export function SiteHeader() {
           ))}
         </nav>
         <button
-          className="rounded-md border border-border px-3 py-2 text-sm md:hidden"
+          className="rounded-md border border-border px-3 py-2 text-sm lg:hidden"
           onClick={() => setOpen(!open)}
-          aria-label="Abrir menu"
+          aria-expanded={open}
+          aria-label={open ? "Fechar menu" : "Abrir menu"}
         >
-          Menu
+          {open ? "Fechar" : "Menu"}
         </button>
       </div>
       {open && (
-        <nav className="flex flex-col border-t border-border px-5 py-3 md:hidden">
+        <nav className="flex flex-col border-t border-border px-5 py-3 lg:hidden" aria-label="Navegação móvel">
           {nav.map((n) => (
             <Link key={n.to} to={n.to} onClick={() => setOpen(false)} className="py-2 text-sm font-medium">
               {n.label}
