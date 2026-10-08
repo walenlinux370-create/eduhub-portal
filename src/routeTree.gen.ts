@@ -141,6 +141,7 @@ export interface FileRoutesByTo {
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
+  '/': typeof IndexRoute
   '/admissoes': typeof AdmissoesRoute
   '/contactos': typeof ContactosRoute
   '/ensino': typeof EnsinoRoute
