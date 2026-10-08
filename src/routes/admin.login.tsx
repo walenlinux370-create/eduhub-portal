@@ -78,7 +78,7 @@ function AdminLogin() {
         throw new Error("A sessão administrativa não ficou disponível após a verificação MFA.");
       }
 
-      window.location.assign("/admin");
+      await navigate({ to: "/admin", replace: true });
     } catch (error) {
       console.error("Admin MFA verification failed:", error);
       setError(error instanceof Error ? error.message : (step === "enroll" ? "Não foi possível ativar o MFA. Confirme o código." : "Código de autenticação inválido."));
