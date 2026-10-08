@@ -40,6 +40,7 @@ export function AdminShell({ children }: { children: ReactNode }) {
   const [ready, setReady] = useState(false);
   const [name, setName] = useState("Administrador");
   const [checkStage, setCheckStage] = useState("A iniciar a validação…");
+  const [checkError, setCheckError] = useState("");
 
   useEffect(() => {
     let alive = true;
@@ -100,8 +101,9 @@ export function AdminShell({ children }: { children: ReactNode }) {
       } catch (error) {
         console.error("Admin session check failed:", error);
         if (alive) {
-          setCheckStage("A sessão não foi validada. A regressar ao login…");
-          void navigate({ to: "/admin/login", replace: true });
+          const message = error instanceof Error ? error.message : String(error);
+          setCheckError(message);
+          setCheckStage("Falha na validação administrativa.");
         }
       }
     }
@@ -124,6 +126,7 @@ export function AdminShell({ children }: { children: ReactNode }) {
         <div className="w-full max-w-md rounded-2xl border bg-background p-6 text-center shadow-sm">
           <p className="text-sm font-semibold text-primary">A verificar sessão administrativa…</p>
           <p className="mt-2 text-xs text-muted-foreground">{checkStage}</p>
+          {checkError ? <p className="mt-3 break-words rounded-lg border border-destructive/30 bg-destructive/5 p-3 text-left text-xs text-destructive">{checkError}</p> : null}
         </div>
       </div>
     );
