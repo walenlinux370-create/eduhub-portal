@@ -96,13 +96,13 @@ const AdminDefinicoesRoute = AdminDefinicoesRouteImport.update({
 } as any)
 
 export interface FileRoutesByFullPath {
-  '/': typeof IndexRouteRoute
-  '/admissoes': typeof AdmissoesRouteRoute
-  '/contactos': typeof ContactosRouteRoute
-  '/ensino': typeof EnsinoRouteRoute
-  '/noticias': typeof NoticiasRouteRoute
-  '/sobre': typeof SobreRouteRoute
-  '/privacidade': typeof PrivacidadeRouteRoute
+  '/': typeof IndexRoute
+  '/admissoes': typeof AdmissoesRoute
+  '/contactos': typeof ContactosRoute
+  '/ensino': typeof EnsinoRoute
+  '/noticias': typeof NoticiasRoute
+  '/sobre': typeof SobreRoute
+  '/privacidade': typeof PrivacidadeRoute
   '/admin': typeof AdminRoute
   '/admin/login': typeof AdminLoginRoute
   '/admin/redefinir': typeof AdminRedefinirRoute
@@ -118,13 +118,13 @@ export interface FileRoutesByFullPath {
   '/admin/definicoes': typeof AdminDefinicoesRoute
 }
 export interface FileRoutesByTo {
-  '/': typeof IndexRouteRoute
-  '/admissoes': typeof AdmissoesRouteRoute
-  '/contactos': typeof ContactosRouteRoute
-  '/ensino': typeof EnsinoRouteRoute
-  '/noticias': typeof NoticiasRouteRoute
-  '/sobre': typeof SobreRouteRoute
-  '/privacidade': typeof PrivacidadeRouteRoute
+  '/': typeof IndexRoute
+  '/admissoes': typeof AdmissoesRoute
+  '/contactos': typeof ContactosRoute
+  '/ensino': typeof EnsinoRoute
+  '/noticias': typeof NoticiasRoute
+  '/sobre': typeof SobreRoute
+  '/privacidade': typeof PrivacidadeRoute
   '/admin': typeof AdminRoute
   '/admin/login': typeof AdminLoginRoute
   '/admin/redefinir': typeof AdminRedefinirRoute
