@@ -1,12 +1,13 @@
 # Escola Comunitária Jossyquina — Plataforma EdTech
 
-Plataforma integrada para site institucional, portal do estudante, painel docente e administração.
+Site institucional da Escola Comunitária Jossyquina, com integração Supabase para conteúdos públicos.
 
-Stack: Next.js App Router, React, TypeScript, Tailwind CSS, Supabase/PostgreSQL, Zod e Vitest.
+Stack: TanStack Start, React, TypeScript, Tailwind CSS, Supabase/PostgreSQL, Zod e Vitest.
 
 ## Estrutura
-- src/app: páginas públicas, portais e APIs
-- src/lib: Supabase, autenticação, validação e sanitização
+- src/routes: páginas públicas do site
+- src/components: componentes da interface pública
+- src/lib: Supabase, validação e sanitização
 - supabase/migrations: schema, RLS, triggers e funções
 - tests: testes de aceitação de segurança
 - docs/SECURITY.md: decisões e deploy
