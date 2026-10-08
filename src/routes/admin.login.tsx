@@ -1,6 +1,6 @@
 import { FormEvent, useEffect, useState } from "react";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { LockKeyhole, ShieldCheck } from "lucide-react";
+import { Mail, ShieldCheck } from "lucide-react";
 import { requireSupabase } from "@/lib/supabase";
 
 export const Route = createFileRoute("/admin/login")({
@@ -10,7 +10,6 @@ export const Route = createFileRoute("/admin/login")({
 function AdminLoginPage() {
   const navigate = useNavigate();
   const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
   const [message, setMessage] = useState("");
   const [busy, setBusy] = useState(false);
 
@@ -27,22 +26,19 @@ function AdminLoginPage() {
     setMessage("");
     setBusy(true);
 
-    const { data, error } = await requireSupabase().auth.signInWithPassword({ email, password });
+    const { error } = await requireSupabase().auth.signInWithOtp({
+      email,
+      options: { emailRedirectTo: window.location.origin + "/admin" },
+    });
 
     if (error) {
-      setMessage("Não foi possível autenticar. Verifique as credenciais e o acesso administrativo.");
+      setMessage("Não foi possível enviar o acesso. Verifique o e-mail institucional e a configuração de autenticação.");
       setBusy(false);
       return;
     }
 
-    if (!data.user || (data.user.app_metadata?.role !== "admin" && data.user.app_metadata?.admin !== true)) {
-      await requireSupabase().auth.signOut();
-      setMessage("A conta autenticou, mas não possui permissão administrativa.");
-      setBusy(false);
-      return;
-    }
-
-    void navigate({ to: "/admin" });
+    setMessage("Enviámos um link seguro para o e-mail indicado. O acesso só será permitido se a conta tiver permissão administrativa.");
+    setBusy(false);
   }
 
   return (
@@ -62,32 +58,21 @@ function AdminLoginPage() {
             <span className="mb-2 block text-sm font-medium">E-mail institucional</span>
             <input
               type="email"
-              autoComplete="username"
+              autoComplete="email"
               required
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               className="w-full rounded-md border px-3 py-2.5 outline-none focus:ring-2 focus:ring-amber-300"
             />
           </label>
-          <label className="block">
-            <span className="mb-2 block text-sm font-medium">Palavra-passe</span>
-            <input
-              type="password"
-              autoComplete="current-password"
-              required
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="w-full rounded-md border px-3 py-2.5 outline-none focus:ring-2 focus:ring-amber-300"
-            />
-          </label>
 
-          {message && <p role="alert" className="rounded-md bg-red-50 p-3 text-sm text-red-700">{message}</p>}
+          {message && <p role="status" className="rounded-md bg-amber-50 p-3 text-sm text-slate-700">{message}</p>}
 
           <button
             disabled={busy}
             className="flex w-full items-center justify-center gap-2 rounded-md bg-slate-950 px-4 py-3 font-semibold text-white disabled:opacity-60"
           >
-            <LockKeyhole size={17} /> {busy ? "A autenticar..." : "Entrar no AdminEdu"}
+            <Mail size={17} /> {busy ? "A enviar acesso..." : "Receber link seguro"}
           </button>
         </form>
 
