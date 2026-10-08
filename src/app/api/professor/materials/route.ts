@@ -14,6 +14,15 @@ const allowed=new Set([
  "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
 ]);
 const ext=new Map([["application/pdf","pdf"],["image/jpeg","jpg"],["image/png","png"],["video/mp4","mp4"],["application/vnd.openxmlformats-officedocument.wordprocessingml.document","docx"]]);
+function hasMagic(type:string,bytes:Uint8Array){
+ if(type==="application/pdf") return new TextDecoder().decode(bytes.slice(0,5))==="%PDF-";
+ if(type==="image/jpeg") return bytes[0]===0xff&&bytes[1]===0xd8&&bytes[2]===0xff;
+ if(type==="image/png") return bytes.slice(0,8).every((b,i)=>b===[137,80,78,71,13,10,26,10][i]);
+ if(type==="video/mp4") return bytes.length>=8&&new TextDecoder().decode(bytes.slice(4,8))==="ftyp";
+ if(type==="application/vnd.openxmlformats-officedocument.wordprocessingml.document")
+   return bytes[0]===0x50&&bytes[1]===0x4b&&bytes[2]===0x03&&bytes[3]===0x04;
+ return false;
+}
 
 export async function POST(req:Request){
  const teacher=await requireRole("teacher");
@@ -26,13 +35,14 @@ export async function POST(req:Request){
  if(!parsed.success || !(file instanceof File) || file.size<1 || file.size>52428800 || !allowed.has(file.type))
    return NextResponse.json({error:"invalid_file"},{status:400});
  const d=parsed.data;
+ const bytes=Buffer.from(await file.arrayBuffer());
+ if(!hasMagic(file.type,bytes)) return NextResponse.json({error:"invalid_file"},{status:400});
  const {data:a}=await supabaseAdmin.from("teacher_assignments").select("id")
   .eq("teacher_id",teacher.id).eq("class_id",d.class_id).eq("subject_id",d.subject_id).maybeSingle();
  if(!a)return NextResponse.json({error:"forbidden_scope"},{status:403});
 
  const safeName=file.name.replace(/[^a-zA-Z0-9._-]/g,"_").slice(-120);
  const path=`${d.class_id}/${d.subject_id}/${crypto.randomUUID()}-${safeName || `material.${ext.get(file.type)}`}`;
- const bytes=Buffer.from(await file.arrayBuffer());
  const upload=await supabaseAdmin.storage.from("materials").upload(path,bytes,{contentType:file.type,upsert:false});
  if(upload.error)return NextResponse.json({error:"upload_failed"},{status:400});
 
