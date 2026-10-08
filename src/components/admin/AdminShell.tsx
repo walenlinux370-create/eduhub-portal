@@ -17,19 +17,37 @@ const items = [
   ["/admin/definicoes", "Definições", Settings],
 ] as const;
 
-const CHECK_TIMEOUT_MS = 8000;
+const CHECK_TIMEOUT_MS = 6000;
 
-function withTimeout<T>(promise: Promise<T>, message: string): Promise<T> {
+function waitForAuthSession(
+  supabase: ReturnType<typeof requireSupabase>,
+): Promise<import("@supabase/supabase-js").Session | null> {
   return new Promise((resolve, reject) => {
-    const timer = window.setTimeout(() => reject(new Error(message)), CHECK_TIMEOUT_MS);
-    promise.then(
-      (value) => {
-        window.clearTimeout(timer);
-        resolve(value);
-      },
-      (error) => {
-        window.clearTimeout(timer);
-        reject(error);
+    let settled = false;
+
+    const finish = (fn: () => void) => {
+      if (settled) return;
+      settled = true;
+      window.clearTimeout(timer);
+      subscription.unsubscribe();
+      fn();
+    };
+
+    const timer = window.setTimeout(() => {
+      finish(() =>
+        reject(
+          new Error(
+            "O Supabase não disponibilizou a sessão no navegador. Recarregue a página e tente novamente.",
+          ),
+        ),
+      );
+    }, CHECK_TIMEOUT_MS);
+
+    const { data: subscription } = supabase.auth.onAuthStateChange(
+      (event, session) => {
+        if (event === "INITIAL_SESSION" || session) {
+          finish(() => resolve(session));
+        }
       },
     );
   });
@@ -50,16 +68,9 @@ export function AdminShell({ children }: { children: ReactNode }) {
         const supabase = requireSupabase();
 
         if (alive) setCheckStage("A recuperar a sessão administrativa…");
-        const sessionResult = await withTimeout(
-          supabase.auth.getSession(),
-          "A recuperação da sessão demorou demasiado tempo.",
-        );
+        const session = await waitForAuthSession(supabase);
 
-        if (sessionResult.error) {
-          throw new Error("Não foi possível recuperar a sessão: " + sessionResult.error.message);
-        }
-
-        if (!sessionResult.data.session?.user?.id) {
+        if (!session?.user?.id) {
           if (alive) {
             await navigate({ to: "/admin/login", replace: true });
           }
