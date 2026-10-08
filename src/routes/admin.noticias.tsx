@@ -65,7 +65,7 @@ function AdminNoticiasPage(){
   }
 
   async function remove(n:News){
-    if(!window.confirm("Eliminar a notícia ""+n.title+""?"))return;
+    if(!window.confirm(`Eliminar a notícia "${n.title}"?`))return;
     setBusy(true);
     try{const r=await supabase.from("news").delete().eq("id",n.id);if(r.error)throw r.error;await load();setMessage("Notícia eliminada.");}
     catch(e:any){setMessage(e?.message||"Não foi possível eliminar a notícia.");}
