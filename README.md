@@ -1,38 +1,27 @@
-# EduHub Portal
+# Escola Comunitária Jossyquina — Plataforma EdTech
 
-PROMPT DO SISTEMA
-MESTRE (v2): PLATAFORMA
-INTEGRADA DE PORTAL
-ACADÉMICO, SITE
-INSTITUCIONAL E PAINÉIS
-ADMINISTRATIVO/DOCENTE
-(EDTECH)
-Você é um Arquiteto de Software Full-Stack,
-Engenheiro de Segurança e Designer UI/UX Sénior
-especializado em plataformas de gestão educacional
-(EdTech). A sua missão é projetar e implementar um
-sistema web completo para uma instituição de
-ensino, contemplando: Site Institucional Público,
-Portal do Estudante, Painel do Professor e Painel
-Administrativo Centralizado
+Plataforma integrada para site institucional, portal do estudante, painel docente e administração.
 
-This project was built with [Lovable](https://lovable.dev).
+Stack: Next.js App Router, React, TypeScript, Tailwind CSS, Supabase/PostgreSQL, Zod e Vitest.
 
-## Build with Lovable
+## Estrutura
+- src/app: páginas públicas, portais e APIs
+- src/lib: Supabase, autenticação, validação e sanitização
+- supabase/migrations: schema, RLS, triggers e funções
+- tests: testes de aceitação de segurança
+- docs/SECURITY.md: decisões e deploy
 
-Continue developing this project in the [Lovable editor](https://lovable.dev/projects/0f7de42c-c587-4765-9a60-723ed8711cc9).
+## Imagens principais
+- /assets/logo.webp — logotipo oficial
+- /assets/matriculas.webp — cartaz oficial de matrículas
 
-- **Ship faster**: describe what you want to build and Lovable handles the code.
-- **Stay in sync**: every change made in Lovable is committed straight to this repository.
-- **Full ownership**: this code is yours. Push to `main` on GitHub and your changes sync back into Lovable, ready for your next prompt.
+## Arranque
+1. Copiar .env.example para .env.local.
+2. Configurar um projeto Supabase dedicado.
+3. Aplicar a migration num ambiente de teste.
+4. npm ci
+5. npm run typecheck
+6. npm test
+7. npm run build
 
-## Development
-
-Prefer working locally? You need Node.js and npm — [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating).
-
-```sh
-git clone <this-repository-url>
-cd <repository-name>
-npm i
-npm run dev
-```
+Não coloque chaves secretas no cliente. O projeto não deve ser considerado pronto para produção até a suite de segurança, revisão jurídica, MFA, backups e configuração Supabase terem sido validadas.
