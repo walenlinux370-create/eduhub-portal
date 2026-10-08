@@ -15,7 +15,8 @@ as $$
   )
 $$;
 
-revoke all on function public.subject_matches_class(uuid,uuid) from public,anon,authenticated;
+revoke all on function public.subject_matches_class(uuid,uuid) from public,anon;
+grant execute on function public.subject_matches_class(uuid,uuid) to authenticated;
 
 create or replace function public.calculate_final_grade(p_scores jsonb)
 returns numeric
