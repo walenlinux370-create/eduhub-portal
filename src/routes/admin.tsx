@@ -16,6 +16,8 @@ import {
 } from "lucide-react";
 import { requireSupabase } from "@/lib/supabase";
 import { CRITICAL_ACTIONS } from "@/lib/adminedu/policy";
+import { GradeWorkflowPanel } from "@/components/adminedu/GradeWorkflowPanel";
+import { AdminMfaGate } from "@/components/adminedu/AdminMfaGate";
 
 export const Route = createFileRoute("/admin")({
   component: AdminEduPage,
@@ -36,6 +38,7 @@ function AdminEduPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [openMenu, setOpenMenu] = useState(false);
+  const [mfaRequired, setMfaRequired] = useState(false);
 
   useEffect(() => {
     let active = true;
@@ -58,7 +61,9 @@ function AdminEduPage() {
           setLoading(false);
           return;
         }
+        const { data: aalData } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
         setUser(data.user);
+        setMfaRequired(aalData?.currentLevel !== "aal2");
         setLoading(false);
       })
       .catch(() => {
@@ -79,6 +84,7 @@ function AdminEduPage() {
 
   if (loading) return <CenteredState text="A validar o acesso seguro..." />;
   if (error) return <CenteredState text={error} danger />;
+  if (mfaRequired) return <AdminMfaGate onReady={() => setMfaRequired(false)} />;
 
   const modules = [
     { icon: Users, title: "Alunos", text: "Gestão com minimização e referências anonimizadas." },
@@ -174,6 +180,8 @@ function AdminEduPage() {
             ))}
           </div>
         </section>
+
+        <GradeWorkflowPanel />
 
         <section className="mt-8 rounded-xl border bg-white p-5 shadow-sm">
           <div className="flex gap-3">
