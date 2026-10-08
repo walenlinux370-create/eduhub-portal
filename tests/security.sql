@@ -1,5 +1,5 @@
 begin;
-select plan(18);
+select plan(20);
 
 select ok((select relrowsecurity from pg_class where oid='public.students'::regclass),'students RLS ativo');
 select ok((select relrowsecurity from pg_class where oid='public.grades'::regclass),'grades RLS ativo');
@@ -19,6 +19,8 @@ select ok(exists(select 1 from pg_trigger where tgname='grades_guard'),'trigger 
 select ok(has_function_privilege('service_role','public.verify_student_login(text,text,inet)','EXECUTE'),'service_role executa verificação server-side');
 select ok(has_function_privilege('service_role','public.issue_student_auth_code(uuid,uuid)','EXECUTE'),'service_role emite código server-side');
 select ok((select prosecdef from pg_proc where oid='public.verify_student_login(text,text,inet)'::regprocedure),'login é SECURITY DEFINER');
+select ok((select relrowsecurity from pg_class where oid='public.public_rate_limits'::regclass),'rate limit RLS ativo');
+select ok(not has_function_privilege('authenticated','public.check_public_rate_limit(text,text,integer,integer)','EXECUTE'),'rate limit só é executável pelo servidor');
 
 select * from finish();
 rollback;
