@@ -14,7 +14,7 @@ export function AdminPasswordReset(){
   async function submit(e:React.FormEvent<HTMLFormElement>){
     e.preventDefault();
     setBusy(true);setError("");setSent(false);
-    const site=process.env.NEXT_PUBLIC_SITE_URL||window.location.origin;
+    const site=process.env['NEXT_PUBLIC_SITE_URL']||window.location.origin;
     const {error:resetError}=await supabase.auth.resetPasswordForEmail(email.trim().toLowerCase(),{
       redirectTo:new URL("/admin/redefinir",site).toString()
     });

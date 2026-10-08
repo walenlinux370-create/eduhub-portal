@@ -3,7 +3,8 @@
 import {useState} from "react";
 
 export function AdminStudentActions({studentId,status}:{studentId:string;status:string}) {
-  const [code,setCode]=useState<string|null>(null);\n  const [loginIdentifier,setLoginIdentifier]=useState<string|null>(null);
+  const [code,setCode]=useState<string|null>(null);
+  const [loginIdentifier,setLoginIdentifier]=useState<string|null>(null);
   const [busy,setBusy]=useState(false);
   const [message,setMessage]=useState("");
 
@@ -13,7 +14,8 @@ export function AdminStudentActions({studentId,status}:{studentId:string;status:
     const data=await res.json().catch(()=>({}));
     setBusy(false);
     if(!res.ok){setMessage("Não foi possível emitir o código.");return;}
-    setCode(data.code);\n    setLoginIdentifier(data.login_identifier ?? null);
+    setCode(data.code);
+    setLoginIdentifier(data.login_identifier ?? null);
   }
 
   async function deactivate(){
